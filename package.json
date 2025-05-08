@@ -1,0 +1,12 @@
+{
+  "name": "prac-7",
+  "version": "1.0.0",
+  "description": "Web Programming Practical 7",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
