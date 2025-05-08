@@ -32,6 +32,7 @@
             <form class="pure-form">
                 <button type="button" class="pure-button pure-input-1-2 pure-button-primary">show all posts</button>
             </form>
+            <div id="posts-container"></div>
         </div>
         <div id="tcs" style="display: none;">
             <h2>Terms and Conditions</h2>
@@ -41,31 +42,38 @@
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function () {
             // Get DOM elements
             const titleInput = document.querySelector('#newpost input');
             const contentTextarea = document.querySelector('#newpost textarea');
-            const postButton = document.querySelector('#newpost button');
+            const makePostButton = document.querySelector('#newpost button');
             const showPostsButton = document.querySelector('#posts button');
-            const postsContainer = document.querySelector('#posts');
+            const postsContainer = document.querySelector('#posts-container');
 
-            // Function to make a post
-            postButton.addEventListener('click', () => {
+            // Add event listener for make post button
+            makePostButton.addEventListener('click', function () {
                 const title = titleInput.value.trim();
                 const content = contentTextarea.value.trim();
 
+                // Validate inputs
                 if (!title || !content) {
-                    alert('Please enter both title and content');
+                    alert('Both title and content are required');
                     return;
                 }
 
-                // Send post data to server
+                // Create post data
+                const postData = {
+                    title: title,
+                    content: content
+                };
+
+                // Send POST request
                 fetch('/users/addpost', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ title, content })
+                    body: JSON.stringify(postData)
                 })
                     .then(response => {
                         if (!response.ok) {
@@ -77,16 +85,19 @@
                         // Clear input fields
                         titleInput.value = '';
                         contentTextarea.value = '';
+
+                        // Show success message
                         alert('Post added successfully!');
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to add post');
+                        alert('Failed to add post: ' + error.message);
                     });
             });
 
-            // Function to show all posts
-            showPostsButton.addEventListener('click', () => {
+            // Add event listener for show all posts button
+            showPostsButton.addEventListener('click', function () {
+                // Send GET request
                 fetch('/users/getposts')
                     .then(response => {
                         if (!response.ok) {
@@ -95,33 +106,27 @@
                         return response.json();
                     })
                     .then(posts => {
-                        // Create a container for the posts
-                        let postsHTML = '<h2>Current Posts</h2>';
+                        // Clear posts container
+                        postsContainer.innerHTML = '';
 
-                        // Add button again
-                        postsHTML += '<form class="pure-form"><button type="button" class="pure-button pure-input-1-2 pure-button-primary">show all posts</button></form>';
-
-                        // Display each post
+                        // Create elements for each post
                         posts.forEach(post => {
-                            postsHTML += `
-                    <div>
-                      <h2>${post.title}</h2>
-                      <p>${post.content}</p>
-                    </div>
-                  `;
-                        });
+                            const postDiv = document.createElement('div');
+                            const titleH2 = document.createElement('h2');
+                            const contentP = document.createElement('p');
 
-                        // Update the posts container
-                        postsContainer.innerHTML = postsHTML;
+                            titleH2.textContent = post.title;
+                            contentP.textContent = post.content;
 
-                        // Re-attach event listener to the new button
-                        document.querySelector('#posts button').addEventListener('click', () => {
-                            showPostsButton.click();
+                            postDiv.appendChild(titleH2);
+                            postDiv.appendChild(contentP);
+
+                            postsContainer.appendChild(postDiv);
                         });
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to get posts');
+                        postsContainer.innerHTML = '<p>Error loading posts: ' + error.message + '</p>';
                     });
             });
         });
