@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Prac 7 Task 1.4</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+    <style>
+        .button-success {
+            background: rgb(28, 184, 65);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>My Blog</h1>
+        <hr />
+        <div id="newpost">
+            <h2>Add a post</h2>
+            <form class="pure-form">
+                <fieldset class="pure-group">
+                    <input type="text" class="pure-input-1-2" placeholder="Blog post title">
+                    <textarea class="pure-input-1-2" placeholder="Blog Post Content"></textarea>
+                </fieldset>
+                <button type="button" class="pure-button pure-input-1-2 pure-button-primary">make post</button>
+            </form>
+        </div>
+        <hr />
+        <div id="posts">
+            <h2>Current Posts</h2>
+            <form class="pure-form">
+                <button type="button" class="pure-button pure-input-1-2 pure-button-primary">show all posts</button>
+            </form>
+        </div>
+        <div id="tcs" style="display: none;">
+            <h2>Terms and Conditions</h2>
+            <p>All your base are belong to us.</p>
+            <button type="button" class="pure-button button-success">Accept</button>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get DOM elements
+            const titleInput = document.querySelector('#newpost input');
+            const contentTextarea = document.querySelector('#newpost textarea');
+            const postButton = document.querySelector('#newpost button');
+            const showPostsButton = document.querySelector('#posts button');
+            const postsContainer = document.querySelector('#posts');
+
+            // Function to make a post
+            postButton.addEventListener('click', () => {
+                const title = titleInput.value.trim();
+                const content = contentTextarea.value.trim();
+
+                if (!title || !content) {
+                    alert('Please enter both title and content');
+                    return;
+                }
+
+                // Send post data to server
+                fetch('/users/addpost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to add post');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Clear input fields
+                        titleInput.value = '';
+                        contentTextarea.value = '';
+                        alert('Post added successfully!');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to add post');
+                    });
+            });
+
+            // Function to show all posts
+            showPostsButton.addEventListener('click', () => {
+                fetch('/users/getposts')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to get posts');
+                        }
+                        return response.json();
+                    })
+                    .then(posts => {
+                        // Create a container for the posts
+                        let postsHTML = '<h2>Current Posts</h2>';
+
+                        // Add button again
+                        postsHTML += '<form class="pure-form"><button type="button" class="pure-button pure-input-1-2 pure-button-primary">show all posts</button></form>';
+
+                        // Display each post
+                        posts.forEach(post => {
+                            postsHTML += `
+                    <div>
+                      <h2>${post.title}</h2>
+                      <p>${post.content}</p>
+                    </div>
+                  `;
+                        });
+
+                        // Update the posts container
+                        postsContainer.innerHTML = postsHTML;
+
+                        // Re-attach event listener to the new button
+                        document.querySelector('#posts button').addEventListener('click', () => {
+                            showPostsButton.click();
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to get posts');
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>
