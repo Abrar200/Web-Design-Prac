@@ -1,0 +1,17 @@
+{
+    "name": "prac-7",
+    "version": "1.0.0",
+    "description": "Web Programming Practical 8",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "cookie-parser": "^1.4.7",
+        "express": "^4.21.2",
+        "mysql2": "^3.14.1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}
